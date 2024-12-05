@@ -38,8 +38,8 @@ Sentence: {text}
 
 # ฟังก์ชันหลัก
 def main():
-    st.title("Chinese Sentence Translation and Analysis with Pinyin")
-    st.write("Translate and analyze Chinese sentences with ease!")
+    st.title("Translate and Understand Chinese Sentences")
+    st.write("Easily translate and analyze Chinese text")
 
     # รับ Input จากผู้ใช้
     chinese_text = st.text_area("Enter a Chinese sentence:")

@@ -10,17 +10,21 @@ openai.api_key = api_key
 
 # ฟังก์ชันแปลภาษาจีน
 def translate_text(text, target_language="th"):
-    prompt = f"Translate the following Chinese sentence into {target_language}: {text}"
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=100
-    )
-    return response.choices[0].message["content"].strip()
+    try:
+        prompt = f"Translate the following Chinese sentence into {target_language}: {text}"
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=100
+        )
+        return response.choices[0].message["content"].strip()
+    except Exception as e:
+        return f"Error during translation: {str(e)}"
 
 # ฟังก์ชันแยกคำศัพท์พร้อมตัวอย่างการใช้งานและคำพ้องความหมาย
 def extract_vocab_with_pinyin(text, target_language="th"):
-    prompt = f"""
+    try:
+        prompt = f"""
 Analyze the following Chinese sentence. Extract important words and provide:
 1. The word in Chinese.
 2. The pinyin (romanized pronunciation).
@@ -33,17 +37,23 @@ Return the result as a JSON array, where each element is a dictionary with keys:
 "word", "pinyin", "part_of_speech", "meaning", "example", and "synonyms".
 
 Sentence: {text}
-    """
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=500
-    )
-    return json.loads(response.choices[0].message["content"].strip())
+        """
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=500
+        )
+        return json.loads(response.choices[0].message["content"].strip())
+    except json.JSONDecodeError as e:
+        st.error(f"JSON Decode Error: {str(e)}")
+        return []
+    except Exception as e:
+        st.error(f"Error during vocabulary extraction: {str(e)}")
+        return []
 
 # ฟังก์ชันหลัก
 def main():
-    st.title("Chinese Sentence Translation and Vocabulary Analysis")
+    st.title("Chinese Sentences Translation and Vocabulary Analysis ")
     st.write("Easily translate Chinese sentences and learn key vocabulary with examples and synonyms.")
 
     # รับ Input จากผู้ใช้
@@ -65,6 +75,7 @@ def main():
                     if vocab_data:
                         st.subheader("Vocabulary Analysis with Examples and Synonyms")
                         
+                        # จัดลำดับ DataFrame ให้ Part of Speech อยู่ก่อน Meaning
                         df = pd.DataFrame(vocab_data)
                         df = df[["word", "pinyin", "part_of_speech", "meaning", "example", "synonyms"]]
                         df['synonyms'] = df['synonyms'].apply(lambda x: ", ".join(x) if isinstance(x, list) and x else "N/A")
@@ -81,7 +92,7 @@ def main():
                     else:
                         st.error("No vocabulary data extracted. Please try again with a different sentence.")
                 except Exception as e:
-                    st.error(f"An error occurred: {str(e)}")
+                    st.error(f"An error occurred during vocabulary analysis: {str(e)}")
         else:
             st.error("Please provide an API key and input text.")
 

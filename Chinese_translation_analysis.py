@@ -47,26 +47,27 @@ def extract_vocab_with_pinyin(text, target_language="en"):
         if not content:
             return []
         
-        # Now we need to parse the content into a structured form. 
-        # If it's in plain text, we split it based on lines, and then process each line.
+        # Process the content into a structured format
         vocab_list = []
         
-        # Split the response by newlines and process each line
-        for line in content.split("\n"):
+        # Here, we're trying to parse the response into individual word data
+        # The following assumes that the words are separated by newlines, and we are simply splitting it into parts.
+        lines = content.split("\n")
+        
+        for line in lines:
+            # Each line is expected to be of the format: word - pinyin - part_of_speech - meaning - example
             parts = line.split(" - ")
-            if len(parts) >= 5:
-                # Assign each part to corresponding variables
+            if len(parts) >= 5:  # Check that there are enough parts
                 word, pinyin, part_of_speech, meaning, example = parts[:5]
                 synonyms = parts[5] if len(parts) > 5 else "N/A"
                 
-                # Append the data as a dictionary to the vocab_list
                 vocab_list.append({
-                    "Word": word,
-                    "Pinyin": pinyin,
-                    "Part of Speech": part_of_speech,
-                    "Meaning": meaning,
-                    "Example (Chinese)": example,
-                    "Synonyms (Chinese)": synonyms
+                    "Word": word.strip(),
+                    "Pinyin": pinyin.strip(),
+                    "Part of Speech": part_of_speech.strip(),
+                    "Meaning": meaning.strip(),
+                    "Example (Chinese)": example.strip(),
+                    "Synonyms (Chinese)": synonyms.strip()
                 })
         
         return vocab_list
@@ -100,12 +101,12 @@ def main():
                         
                         vocab_list = []
                         for word_data in vocab_data:
-                            word = word_data.get('word', 'N/A')
-                            pinyin = word_data.get('pinyin', 'N/A')
-                            part_of_speech = word_data.get('part_of_speech', 'N/A')
-                            meaning = word_data.get('meaning', 'N/A')
-                            example = word_data.get('example', 'N/A')
-                            synonyms = word_data.get('synonyms', 'N/A')
+                            word = word_data.get('Word', 'N/A')
+                            pinyin = word_data.get('Pinyin', 'N/A')
+                            part_of_speech = word_data.get('Part of Speech', 'N/A')
+                            meaning = word_data.get('Meaning', 'N/A')
+                            example = word_data.get('Example (Chinese)', 'N/A')
+                            synonyms = word_data.get('Synonyms (Chinese)', 'N/A')
                             
                             example_translated = translate_text(example, target_language)
                             synonyms_translated = ", ".join(synonyms) if isinstance(synonyms, list) else "N/A"
@@ -141,3 +142,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

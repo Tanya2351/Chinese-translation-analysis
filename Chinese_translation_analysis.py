@@ -37,8 +37,8 @@ Analyze the following Chinese sentence. Extract important words and provide:
 
 # ฟังก์ชันหลัก
 def main():
-    st.title("Translate and Understand Chinese Sentence")
-    st.write("Translate Chinese sentences and learn key vocabulary with examples and synonyms")
+    st.title("Translate and Analyze Chinese Sentences")
+    st.write("Translate and analyze Chinese sentences with vocabulary breakdown!")
 
     # รับ Input จากผู้ใช้
     chinese_text = st.text_area("Enter a Chinese sentence:")
@@ -58,15 +58,16 @@ def main():
                 st.text(vocab_analysis)
                 
                 # การแยกคำจากประโยคและการแสดงในตาราง
+                # จะแยกคำจากข้อมูลที่ได้รับจาก OpenAI API
                 words = vocab_analysis.split("\n")
                 word_data = []
-                
+
                 # แยกแต่ละคำจากผลลัพธ์การวิเคราะห์
                 for word in words:
                     if word.strip():
                         parts = word.split("\t")
-                        if len(parts) == 6:  # แยกข้อมูลที่มีทั้งหมด 6 ชิ้น
-                            word_data.append(parts)
+                        if len(parts) >= 6:  # แยกข้อมูลที่มีทั้งหมด 6 ชิ้น
+                            word_data.append(parts[:6])  # เลือกเฉพาะ 6 คอลัมน์ที่ต้องการ
                 
                 # สร้าง DataFrame
                 if word_data:

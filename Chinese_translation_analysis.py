@@ -53,7 +53,7 @@ Sentence: {text}
 
 # ฟังก์ชันหลัก
 def main():
-    st.title("Chinese Sentences Translation and Vocabulary Analysis ")
+    st.title("Explore and Learn Chinese: Translation & Vocabulary Tools")
     st.write("Easily translate Chinese sentences and learn key vocabulary with examples and synonyms.")
 
     # รับ Input จากผู้ใช้
@@ -75,10 +75,18 @@ def main():
                     if vocab_data:
                         st.subheader("Vocabulary Analysis with Examples and Synonyms")
                         
+                        # แทนที่เครื่องหมาย _ ใน Part of Speech
+                        for word_data in vocab_data:
+                            word_data["part_of_speech"] = word_data["part_of_speech"].replace("_", "")
+
                         # จัดลำดับ DataFrame ให้ Part of Speech อยู่ก่อน Meaning
                         df = pd.DataFrame(vocab_data)
                         df = df[["word", "pinyin", "part_of_speech", "meaning", "example", "synonyms"]]
+                        
+                        # แสดงคำพ้องความหมายเป็นลิสต์หรือ "N/A"
                         df['synonyms'] = df['synonyms'].apply(lambda x: ", ".join(x) if isinstance(x, list) and x else "N/A")
+                        
+                        # แสดง DataFrame
                         st.dataframe(df)
 
                         # ดาวน์โหลดผลลัพธ์

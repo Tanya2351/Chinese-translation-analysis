@@ -18,14 +18,15 @@ def translate_text(text, target_language="en"):
     return response.choices[0].message["content"].strip()
 
 # ฟังก์ชันแยกคำศัพท์พร้อมพินอินและคำพ้องความหมาย
-def extract_vocab_with_pinyin(text):
+def extract_vocab_with_pinyin(text, target_language="en"):
+    # ปรับ Prompt โดยใช้ภาษาจีนในตัวอย่างเมื่อเลือกภาษาไทย
     prompt = f"""
 Analyze the following Chinese sentence. Extract important words and provide:
 1. The word in Chinese.
 2. The pinyin (romanized pronunciation).
 3. The part of speech (e.g., noun, verb, adjective).
-4. The meaning in English.
-5. An example usage of the word.
+4. The meaning in {target_language}.
+5. An example usage of the word (in Chinese).
 6. Provide synonyms for each word.
 
 Sentence: {text}
@@ -55,7 +56,7 @@ def main():
                 st.write(translation)
                 
                 # วิเคราะห์คำศัพท์พร้อมพินอินและคำพ้องความหมาย
-                vocab_analysis = extract_vocab_with_pinyin(chinese_text)
+                vocab_analysis = extract_vocab_with_pinyin(chinese_text, target_language)
                 st.subheader("Vocabulary Analysis with Pinyin")
 
                 # แยกข้อมูลคำศัพท์จากผลลัพธ์ที่ได้รับ
@@ -64,6 +65,8 @@ def main():
                 for line in lines:
                     parts = line.split('\t')
                     if len(parts) == 6:  # ควรมีข้อมูล 6 คอลัมน์ (คำ, พินอิน, ประเภทคำ, ความหมาย, ตัวอย่าง, คำพ้องความหมาย)
+                        # แทนที่คำว่า "无" ด้วย "-"
+                        parts[-1] = parts[-1] if parts[-1] != "无" else "-"
                         vocab_data.append(parts[:6])  # เลือกข้อมูลที่สำคัญ
 
                 # ตรวจสอบว่ามีข้อมูลก่อนที่จะทำการแสดงตาราง

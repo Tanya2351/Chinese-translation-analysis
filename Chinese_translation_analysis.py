@@ -37,8 +37,8 @@ Analyze the following Chinese sentence. Extract important words and provide:
 
 # ฟังก์ชันหลัก
 def main():
-    st.title("Translate and Analyze Chinese Sentences")
-    st.write("Translate and analyze Chinese sentences with vocabulary breakdown!")
+    st.title("Translate and Understand Chinese Sentence")
+    st.write("Translate Chinese sentences and learn key vocabulary with examples and synonyms")
 
     # รับ Input จากผู้ใช้
     chinese_text = st.text_area("Enter a Chinese sentence:")

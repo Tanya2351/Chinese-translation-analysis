@@ -7,8 +7,8 @@ st.sidebar.title("API Key Settings")
 api_key = st.sidebar.text_input("Enter your OpenAI API key:", type="password")
 openai.api_key = api_key
 
-# ฟังก์ชันแปลภาษาจีน
-def translate_text(text, target_language="th"):
+# ฟังก์ชันแปลข้อความ
+def translate_text(text, target_language="en"):
     prompt = f"Translate the following Chinese sentence into {target_language}: {text}"
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",  # ใช้โมเดล gpt-3.5-turbo
@@ -18,14 +18,14 @@ def translate_text(text, target_language="th"):
     return response.choices[0].message["content"].strip()
 
 # ฟังก์ชันแยกคำศัพท์พร้อมพินอิน
-def extract_vocab_with_pinyin(text, target_language="th"):
+def extract_vocab_with_pinyin(text, target_language="en"):
     prompt = f"""
-    Analyze the following Chinese sentence. Extract important words and provide:
+    Analyze the following Chinese sentence or word. Extract important words and provide:
     1. The word in Chinese.
     2. The pinyin (romanized pronunciation).
     3. The part of speech (e.g., noun, verb, adjective).
     4. The meaning in {target_language}.
-    5. An example sentence using the word in the same context as the input sentence in Chinese.
+    5. An example sentence using the word in the same context as the input.
     6. Provide synonyms for each word.
     """
     response = openai.ChatCompletion.create(
@@ -38,11 +38,11 @@ def extract_vocab_with_pinyin(text, target_language="th"):
 # ฟังก์ชันหลัก
 def main():
     st.title("Translate and Analyze Chinese Sentences")
-    st.write("Translate and analyze Chinese sentences with vocabulary breakdown!")
+    st.write("Translate and analyze Chinese sentences or words with vocabulary breakdown!")
 
     # รับ Input จากผู้ใช้
-    chinese_text = st.text_area("Enter a Chinese sentence:")
-    target_language = st.selectbox("Select target language:", ["th", "en"])
+    chinese_text = st.text_area("Enter a Chinese sentence or word:")
+    target_language = st.selectbox("Select target language:", ["en", "th"])
     
     if st.button("Translate and Analyze"):
         if api_key and chinese_text:
@@ -58,7 +58,6 @@ def main():
                 st.text(vocab_analysis)
                 
                 # การแยกคำจากประโยคและการแสดงในตาราง
-                # จะแยกคำจากข้อมูลที่ได้รับจาก OpenAI API
                 words = vocab_analysis.split("\n")
                 word_data = []
 
@@ -87,5 +86,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

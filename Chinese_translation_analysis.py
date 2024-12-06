@@ -63,8 +63,8 @@ def main():
                 lines = vocab_analysis.split('\n')
                 for line in lines:
                     parts = line.split('\t')
-                    if len(parts) >= 6:
-                        vocab_data.append(parts[:6])  # เลือก 6 คอลัมน์ที่สำคัญ (คำ, พินอิน, ประเภทคำ, ความหมาย, ตัวอย่าง, คำพ้องความหมาย)
+                    if len(parts) == 6:  # ควรมีข้อมูล 6 คอลัมน์ (คำ, พินอิน, ประเภทคำ, ความหมาย, ตัวอย่าง, คำพ้องความหมาย)
+                        vocab_data.append(parts[:6])  # เลือกข้อมูลที่สำคัญ
 
                 # ตรวจสอบว่ามีข้อมูลก่อนที่จะทำการแสดงตาราง
                 if vocab_data:

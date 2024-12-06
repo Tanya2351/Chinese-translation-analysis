@@ -37,7 +37,7 @@ def extract_vocab_with_pinyin(text, target_language="en"):
 
 # ฟังก์ชันหลัก
 def main():
-    st.title("Translate and Analyze Chinese Sentences")
+    st.title("Translate and Analyze Chinese Sentences or Words")
     st.write("Translate and analyze Chinese sentences or words with vocabulary breakdown!")
 
     # รับ Input จากผู้ใช้
@@ -86,3 +86,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

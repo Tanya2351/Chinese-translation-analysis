@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import openai
-import json
 
 # Sidebar for API Key input
 st.sidebar.title("API Key Settings")

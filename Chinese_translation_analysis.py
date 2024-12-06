@@ -7,8 +7,8 @@ st.sidebar.title("API Key Settings")
 api_key = st.sidebar.text_input("Enter your OpenAI API key:", type="password")
 openai.api_key = api_key
 
-# ฟังก์ชันแปลข้อความ
-def translate_text(text, target_language="en"):
+# ฟังก์ชันแปลภาษาจีน
+def translate_text(text, target_language="th"):
     prompt = f"Translate the following Chinese sentence into {target_language}: {text}"
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",  # ใช้โมเดล gpt-3.5-turbo
@@ -18,15 +18,16 @@ def translate_text(text, target_language="en"):
     return response.choices[0].message["content"].strip()
 
 # ฟังก์ชันแยกคำศัพท์พร้อมพินอิน
-def extract_vocab_with_pinyin(text, target_language="en"):
+def extract_vocab_with_pinyin(text):
     prompt = f"""
-    Analyze the following Chinese sentence or word. Extract important words and provide:
-    1. The word in Chinese.
-    2. The pinyin (romanized pronunciation).
-    3. The part of speech (e.g., noun, verb, adjective).
-    4. The meaning in {target_language}.
-    5. An example sentence using the word in the same context as the input.
-    6. Provide synonyms for each word.
+Analyze the following Chinese sentence. Extract important words and provide:
+1. The word in Chinese.
+2. The pinyin (romanized pronunciation).
+3. The meaning in English.
+4. The part of speech (e.g., noun, verb, adjective).
+5. An example usage of the word.
+
+Sentence: {text}
     """
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",  # ใช้โมเดล gpt-3.5-turbo
@@ -37,12 +38,12 @@ def extract_vocab_with_pinyin(text, target_language="en"):
 
 # ฟังก์ชันหลัก
 def main():
-    st.title("Translate and Analyze Chinese Sentences or Words")
-    st.write("Translate and analyze Chinese sentences or words with vocabulary breakdown!")
+    st.title("Translate and Understand Chinese Sentence")
+    st.write("Easily translate and analyze Chinese text")
 
     # รับ Input จากผู้ใช้
-    chinese_text = st.text_area("Enter a Chinese sentence or word:")
-    target_language = st.selectbox("Select target language:", ["en", "th"])
+    chinese_text = st.text_area("Enter a Chinese sentence:")
+    target_language = st.selectbox("Select target language:", ["th", "en"])
     
     if st.button("Translate and Analyze"):
         if api_key and chinese_text:
@@ -53,36 +54,27 @@ def main():
                 st.write(translation)
                 
                 # วิเคราะห์คำศัพท์พร้อมพินอิน
-                vocab_analysis = extract_vocab_with_pinyin(chinese_text, target_language)
+                vocab_analysis = extract_vocab_with_pinyin(chinese_text)
                 st.subheader("Vocabulary Analysis with Pinyin")
                 st.text(vocab_analysis)
                 
-                # การแยกคำจากประโยคและการแสดงในตาราง
-                words = vocab_analysis.split("\n")
-                word_data = []
+               
+                df = pd.DataFrame(vocab_data)
+                st.dataframe(df)
 
-                # แยกแต่ละคำจากผลลัพธ์การวิเคราะห์
-                for word in words:
-                    if word.strip():
-                        parts = word.split("\t")
-                        if len(parts) >= 6:  # แยกข้อมูลที่มีทั้งหมด 6 ชิ้น
-                            word_data.append(parts[:6])  # เลือกเฉพาะ 6 คอลัมน์ที่ต้องการ
-                
-                # สร้าง DataFrame
-                if word_data:
-                    df = pd.DataFrame(word_data, columns=["Word", "Pinyin", "Part of Speech", "Meaning", "Example Usage", "Synonyms"])
-                    st.dataframe(df)
-
-                    # ดาวน์โหลดผลลัพธ์
-                    csv = df.to_csv(index=False).encode('utf-8')
-                    st.download_button(
-                        label="Download results as CSV",
-                        data=csv,
-                        file_name="chinese_analysis_with_pinyin.csv",
-                        mime="text/csv",
-                    )
+                # ดาวน์โหลดผลลัพธ์
+                csv = df.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="Download results as CSV",
+                    data=csv,
+                    file_name="chinese_analysis_with_pinyin.csv",
+                    mime="text/csv",
+                )
         else:
             st.error("Please provide an API key and input text.")
+
+if __name__ == "__main__":
+    main()
 
 if __name__ == "__main__":
     main()

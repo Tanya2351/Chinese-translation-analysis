@@ -9,7 +9,7 @@ api_key = st.sidebar.text_input("Enter your OpenAI API key:", type="password")
 openai.api_key = api_key
 
 # ฟังก์ชันแปลภาษาจีน
-def translate_text(text, target_language="th"):
+def translate_text(text, target_language="Thai"):
     prompt = f"Translate the following Chinese sentence into {target_language}: {text}"
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",  # ใช้โมเดล gpt-3.5-turbo
@@ -19,7 +19,7 @@ def translate_text(text, target_language="th"):
     return response.choices[0].message["content"].strip()
 
 # ฟังก์ชันแยกคำศัพท์พร้อมพินอิน
-def extract_vocab_with_pinyin(text, target_language="th"):
+def extract_vocab_with_pinyin(text, target_language="Thai"):
     prompt = f"""
 Analyze the following Chinese sentence. Extract important words and provide:
 1. The word in Chinese.
@@ -53,7 +53,7 @@ def main():
 
     # รับ Input จากผู้ใช้
     chinese_text = st.text_area("Enter a Chinese sentence:")
-    target_language = st.selectbox("Select target language:", ["th", "en"])
+    target_language = st.selectbox("Select target language:", ["Thai", "English"])
     
     if st.button("Translate and Analyze"):
         if api_key and chinese_text:

@@ -17,15 +17,16 @@ def translate_text(text, target_language="th"):
     )
     return response.choices[0].message["content"].strip()
 
-# ฟังก์ชันแยกคำศัพท์พร้อมพินอิน
+# ฟังก์ชันแยกคำศัพท์พร้อมพินอินและคำพ้องความหมาย
 def extract_vocab_with_pinyin(text):
     prompt = f"""
 Analyze the following Chinese sentence. Extract important words and provide:
 1. The word in Chinese.
 2. The pinyin (romanized pronunciation).
-3. The meaning in English.
-4. The part of speech (e.g., noun, verb, adjective).
+3. The part of speech (e.g., noun, verb, adjective).
+4. The meaning in English.
 5. An example usage of the word.
+6. Provide synonyms for each word.
 
 Sentence: {text}
     """
@@ -53,29 +54,35 @@ def main():
                 st.subheader("Translation")
                 st.write(translation)
                 
-                # วิเคราะห์คำศัพท์พร้อมพินอิน
+                # วิเคราะห์คำศัพท์พร้อมพินอินและคำพ้องความหมาย
                 vocab_analysis = extract_vocab_with_pinyin(chinese_text)
                 st.subheader("Vocabulary Analysis with Pinyin")
-                st.text(vocab_analysis)
-                
-               
-                df = pd.DataFrame(vocab_data)
-                st.dataframe(df)
 
-                # ดาวน์โหลดผลลัพธ์
-                csv = df.to_csv(index=False).encode('utf-8')
-                st.download_button(
-                    label="Download results as CSV",
-                    data=csv,
-                    file_name="chinese_analysis_with_pinyin.csv",
-                    mime="text/csv",
-                )
+                # แยกข้อมูลคำศัพท์จากผลลัพธ์ที่ได้รับ
+                vocab_data = []
+                lines = vocab_analysis.split('\n')
+                for line in lines:
+                    parts = line.split('\t')
+                    if len(parts) >= 6:
+                        vocab_data.append(parts[:6])  # เลือก 6 คอลัมน์ที่สำคัญ (คำ, พินอิน, ประเภทคำ, ความหมาย, ตัวอย่าง, คำพ้องความหมาย)
+
+                # สร้าง DataFrame จากข้อมูลที่ได้
+                if vocab_data:
+                    df = pd.DataFrame(vocab_data, columns=["Word", "Pinyin", "Part of Speech", "Meaning", "Example Usage", "Synonyms"])
+                    st.dataframe(df)
+
+                    # ดาวน์โหลดผลลัพธ์
+                    csv = df.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        label="Download results as CSV",
+                        data=csv,
+                        file_name="chinese_analysis_with_pinyin.csv",
+                        mime="text/csv",
+                    )
         else:
             st.error("Please provide an API key and input text.")
 
 if __name__ == "__main__":
     main()
 
-if __name__ == "__main__":
-    main()
 

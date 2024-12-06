@@ -8,7 +8,7 @@ api_key = st.sidebar.text_input("Enter your OpenAI API key:", type="password")
 openai.api_key = api_key
 
 # ฟังก์ชันแปลภาษาจีน
-def translate_text(text, target_language="en"):
+def translate_text(text, target_language="th"):
     prompt = f"Translate the following Chinese sentence into {target_language}: {text}"
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",  # ใช้โมเดล gpt-3.5-turbo
@@ -18,18 +18,17 @@ def translate_text(text, target_language="en"):
     return response.choices[0].message["content"].strip()
 
 # ฟังก์ชันแยกคำศัพท์พร้อมพินอินและคำพ้องความหมาย
-def extract_vocab_with_pinyin(text, target_language="en"):
-    # ปรับ Prompt โดยใช้ภาษาจีนในตัวอย่างเมื่อเลือกภาษาไทย
+def extract_vocab_with_pinyin(text, target_language="th"):
     prompt = f"""
-Analyze the following Chinese sentence. Extract important words and provide:
-1. The word in Chinese.
-2. The pinyin (romanized pronunciation).
-3. The part of speech (e.g., noun, verb, adjective).
-4. The meaning in {target_language}.
-5. An example usage of the word (in Chinese).
-6. Provide synonyms for each word.
+    Analyze the following Chinese sentence. Extract important words and provide:
+    1. The word in Chinese.
+    2. The pinyin (romanized pronunciation).
+    3. The part of speech (e.g., noun, verb, adjective).
+    4. The meaning in {target_language}.
+    5. An example usage of the word (in Chinese).
+    6. Provide synonyms for each word.
 
-Sentence: {text}
+    Sentence: {text}
     """
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",  # ใช้โมเดล gpt-3.5-turbo

@@ -20,13 +20,13 @@ def translate_text(text, target_language="th"):
 # ฟังก์ชันแยกคำศัพท์พร้อมพินอิน
 def extract_vocab_with_pinyin(text, target_language="th"):
     prompt = f"""
-Analyze the following Chinese sentence. Extract important words and provide:
-1. The word in Chinese.
-2. The pinyin (romanized pronunciation).
-3. The part of speech (e.g., noun, verb, adjective).
-4. The meaning in {target_language}.
-5. An example sentence using the word in the same context as the input sentence in Chinese.
-6. Provide synonyms for each word.
+    Analyze the following Chinese sentence. Extract important words and provide:
+    1. The word in Chinese.
+    2. The pinyin (romanized pronunciation).
+    3. The part of speech (e.g., noun, verb, adjective).
+    4. The meaning in {target_language}.
+    5. An example sentence using the word in the same context as the input sentence in Chinese.
+    6. Provide synonyms for each word.
     """
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",  # ใช้โมเดล gpt-3.5-turbo
@@ -87,3 +87,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

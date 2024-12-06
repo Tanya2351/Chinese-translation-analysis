@@ -66,7 +66,7 @@ Sentence: {text}
 
 # ฟังก์ชันหลัก
 def main():
-    st.title("Translate and Understand Chinese Sentences")
+    st.title("Chinese Sentence Translation and Vocabulary Analysis")
     st.write("Easily translate Chinese sentences and learn key vocabulary with examples and synonyms.")
 
     # รับ Input จากผู้ใช้

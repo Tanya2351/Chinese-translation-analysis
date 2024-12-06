@@ -2,144 +2,87 @@ import streamlit as st
 import pandas as pd
 import openai
 
-# Sidebar for API Key input
+# Sidebar สำหรับกรอก API Key
 st.sidebar.title("API Key Settings")
 api_key = st.sidebar.text_input("Enter your OpenAI API key:", type="password")
-openai.api_key = api_key  
+openai.api_key = api_key
 
-# Function to translate text
-def translate_text(text, target_language="en"):
-    try:
-        prompt = f"Translate the following Chinese sentence into {target_language}: {text}"
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=100
-        )
-        return response['choices'][0]['message']['content'].strip()
-    except Exception as e:
-        return f"Error during translation: {str(e)}"
+# ฟังก์ชันแปลภาษาจีน
+def translate_text(text, target_language="th"):
+    prompt = f"Translate the following Chinese sentence into {target_language}: {text}"
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",  # ใช้โมเดล gpt-3.5-turbo
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=100
+    )
+    return response.choices[0].message["content"].strip()
 
-# Function to extract vocabulary with pinyin
-def extract_vocab_with_pinyin(text, target_language="en"):
-    try:
-        prompt = f"""
-        Analyze the following Chinese sentence. Break it into individual words and provide:
-        1. The word in Chinese.
-        2. The pinyin (romanized pronunciation).
-        3. The part of speech (e.g., noun, verb, adjective).
-        4. The meaning of each word in {target_language}.
-        5. Create a new example sentence using each word in the same context as the input sentence, written in Chinese.
-        6. Synonyms for each word in Chinese, if available.
+# ฟังก์ชันแยกคำศัพท์พร้อมพินอิน
+def extract_vocab_with_pinyin(text, target_language="th"):
+    prompt = f"""
+Analyze the following Chinese sentence. Extract important words and provide:
+1. The word in Chinese.
+2. The pinyin (romanized pronunciation).
+3. The part of speech (e.g., noun, verb, adjective).
+4. The meaning in {target_language}.
+5. An example sentence using the word in the same context as the input sentence in Chinese.
+6. Provide synonyms for each word.
+    """
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",  # ใช้โมเดล gpt-3.5-turbo
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=300
+    )
+    return response.choices[0].message["content"].strip()
 
-        Sentence: {text}
-        """
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=500
-        )
-        
-        # Extracting content from the API response
-        content = response.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
-        
-        # If the content is empty, return an empty list
-        if not content:
-            return []
-        
-        # Process the content into a structured format
-        vocab_list = []
-        
-        # Here, we're trying to parse the response into individual word data
-        # The following assumes that the words are separated by newlines, and we are simply splitting it into parts.
-        lines = content.split("\n")
-        
-        for line in lines:
-            # Each line is expected to be of the format: word - pinyin - part_of_speech - meaning - example
-            parts = line.split(" - ")
-            if len(parts) >= 5:  # Check that there are enough parts
-                word, pinyin, part_of_speech, meaning, example = parts[:5]
-                synonyms = parts[5] if len(parts) > 5 else "N/A"
-                
-                vocab_list.append({
-                    "Word": word.strip(),
-                    "Pinyin": pinyin.strip(),
-                    "Part of Speech": part_of_speech.strip(),
-                    "Meaning": meaning.strip(),
-                    "Example (Chinese)": example.strip(),
-                    "Synonyms (Chinese)": synonyms.strip()
-                })
-        
-        return vocab_list
-    except Exception as e:
-        st.error(f"Error during vocabulary extraction: {str(e)}")
-        return []
-
-# Main function
+# ฟังก์ชันหลัก
 def main():
-    st.title("Translate and Understand Chinese Sentence")
-    st.write("Translate Chinese sentences and learn key vocabulary with examples and synonyms")
+    st.title("Translate and Analyze Chinese Sentences")
+    st.write("Translate and analyze Chinese sentences with vocabulary breakdown!")
 
-    # Get user input
+    # รับ Input จากผู้ใช้
     chinese_text = st.text_area("Enter a Chinese sentence:")
-    target_language = st.selectbox("Select target language for translation and vocabulary:", ["", "en", "th"], index=0)
-
+    target_language = st.selectbox("Select target language:", ["th", "en"])
+    
     if st.button("Translate and Analyze"):
-        if api_key and chinese_text and target_language:
+        if api_key and chinese_text:
             with st.spinner("Processing..."):
-                # Translate the text
+                # แปลข้อความ
                 translation = translate_text(chinese_text, target_language)
                 st.subheader("Translation")
                 st.write(translation)
+                
+                # วิเคราะห์คำศัพท์พร้อมพินอิน
+                vocab_analysis = extract_vocab_with_pinyin(chinese_text, target_language)
+                st.subheader("Vocabulary Analysis with Pinyin")
+                st.text(vocab_analysis)
+                
+                # การแยกคำจากประโยคและการแสดงในตาราง
+                words = vocab_analysis.split("\n")
+                word_data = []
+                
+                # แยกแต่ละคำจากผลลัพธ์การวิเคราะห์
+                for word in words:
+                    if word.strip():
+                        parts = word.split("\t")
+                        if len(parts) == 6:  # แยกข้อมูลที่มีทั้งหมด 6 ชิ้น
+                            word_data.append(parts)
+                
+                # สร้าง DataFrame
+                if word_data:
+                    df = pd.DataFrame(word_data, columns=["Word", "Pinyin", "Part of Speech", "Meaning", "Example Usage", "Synonyms"])
+                    st.dataframe(df)
 
-                # Analyze the vocabulary
-                try:
-                    vocab_data = extract_vocab_with_pinyin(chinese_text, target_language)
-
-                    if vocab_data:
-                        st.subheader("Vocabulary Analysis with Examples and Synonyms")
-                        
-                        vocab_list = []
-                        for word_data in vocab_data:
-                            word = word_data.get('Word', 'N/A')
-                            pinyin = word_data.get('Pinyin', 'N/A')
-                            part_of_speech = word_data.get('Part of Speech', 'N/A')
-                            meaning = word_data.get('Meaning', 'N/A')
-                            example = word_data.get('Example (Chinese)', 'N/A')
-                            synonyms = word_data.get('Synonyms (Chinese)', 'N/A')
-                            
-                            example_translated = translate_text(example, target_language)
-                            synonyms_translated = ", ".join(synonyms) if isinstance(synonyms, list) else "N/A"
-
-                            vocab_list.append({
-                                "Word": word,
-                                "Pinyin": pinyin,
-                                "Part of Speech": part_of_speech,
-                                "Meaning": meaning,
-                                "Example (Chinese)": example,
-                                "Example (Translated)": example_translated,
-                                "Synonyms (Chinese)": synonyms_translated
-                            })
-
-                        # Display the dataframe
-                        df = pd.DataFrame(vocab_list)
-                        st.dataframe(df)
-
-                        # Download the results as CSV
-                        csv = df.to_csv(index=False).encode('utf-8')
-                        st.download_button(
-                            label="Download results as CSV",
-                            data=csv,
-                            file_name="chinese_analysis_with_pinyin.csv",
-                            mime="text/csv",
-                        )
-                    else:
-                        st.error("No vocabulary data extracted. Please try again with a different sentence.")
-                except Exception as e:
-                    st.error(f"An error occurred during vocabulary analysis: {str(e)}")
+                    # ดาวน์โหลดผลลัพธ์
+                    csv = df.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        label="Download results as CSV",
+                        data=csv,
+                        file_name="chinese_analysis_with_pinyin.csv",
+                        mime="text/csv",
+                    )
         else:
-            st.error("Please provide an API key, input text, and select a target language.")
+            st.error("Please provide an API key and input text.")
 
 if __name__ == "__main__":
     main()
-

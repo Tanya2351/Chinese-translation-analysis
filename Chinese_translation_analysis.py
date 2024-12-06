@@ -3,13 +3,13 @@ import pandas as pd
 import openai
 import json
 
-# Sidebar สำหรับกรอก API Key
+# Sidebar for API Key input
 st.sidebar.title("API Key Settings")
 api_key = st.sidebar.text_input("Enter your OpenAI API key:", type="password")
-openai.api_key = api_key
+openai.api_key = api_key  
 
-# ฟังก์ชันแปลภาษาจีน
-def translate_text(text, target_language="th"):
+# Function to translate text
+def translate_text(text, target_language="en"):
     try:
         prompt = f"Translate the following Chinese sentence into {target_language}: {text}"
         response = openai.ChatCompletion.create(
@@ -17,21 +17,20 @@ def translate_text(text, target_language="th"):
             messages=[{"role": "user", "content": prompt}],
             max_tokens=100
         )
-        return response.choices[0].message["content"].strip()
+        return response['choices'][0]['message']['content'].strip()
     except Exception as e:
         return f"Error during translation: {str(e)}"
 
-# ฟังก์ชันแยกคำศัพท์พร้อมตัวอย่างการใช้งานและคำพ้องความหมาย
-def extract_vocab_with_pinyin(text, target_language="th"):
+# Function to extract vocabulary with pinyin
+def extract_vocab_with_pinyin(text, target_language="en"):
     try:
-        # แยกคำจากประโยคในภาษาจีน
         prompt = f"""
 Analyze the following Chinese sentence. Break it into individual words and provide:
 1. The word in Chinese.
 2. The pinyin (romanized pronunciation).
 3. The part of speech (e.g., noun, verb, adjective).
 4. The meaning of each word in {target_language}.
-5. Create a new example sentence using each word in the same context as the input sentence, written in Chinese. The new sentence should incorporate the word meaningfully and use it in a way that makes sense in context.
+5. Create a new example sentence using each word in the same context as the input sentence, written in Chinese.
 6. Synonyms for each word in Chinese, if available.
 
 Sentence: {text}
@@ -41,53 +40,51 @@ Sentence: {text}
             messages=[{"role": "user", "content": prompt}],
             max_tokens=500
         )
-        return json.loads(response.choices[0].message["content"].strip())
-    except json.JSONDecodeError as e:
-        st.error(f"JSON Decode Error: {str(e)}")
-        return []
+        content = response['choices'][0]['message']['content'].strip()
+        
+        if not content:
+            return []
+        
+        return content
     except Exception as e:
         st.error(f"Error during vocabulary extraction: {str(e)}")
         return []
 
-# ฟังก์ชันหลัก
+# Main function
 def main():
-    st.title("Chinese Sentence Translation and Analysis with Pinyin")
-    st.write("Easily translate Chinese sentences and learn key vocabulary with examples and synonyms.")
+    st.title("Translate and Understand Chinese Sentence")
+    st.write("Translate Chinese sentences and learn key vocabulary with examples and synonyms")
 
-    # รับ Input จากผู้ใช้
+    # Get user input
     chinese_text = st.text_area("Enter a Chinese sentence:")
-    target_language = st.selectbox("Select target language for translation and vocabulary:", ["", "th", "en"], index=0)
+    target_language = st.selectbox("Select target language for translation and vocabulary:", ["", "en", "th"], index=0)
 
     if st.button("Translate and Analyze"):
         if api_key and chinese_text and target_language:
             with st.spinner("Processing..."):
-                # แปลข้อความ
+                # Translate the text
                 translation = translate_text(chinese_text, target_language)
                 st.subheader("Translation")
                 st.write(translation)
 
-                # วิเคราะห์คำศัพท์พร้อมตัวอย่างการใช้งานและคำพ้องความหมาย
+                # Analyze the vocabulary
                 try:
                     vocab_data = extract_vocab_with_pinyin(chinese_text, target_language)
 
                     if vocab_data:
                         st.subheader("Vocabulary Analysis with Examples and Synonyms")
                         
-                        # สร้าง DataFrame เพื่อแสดงผล
                         vocab_list = []
                         for word_data in vocab_data:
-                            word = word_data['word']
-                            pinyin = word_data['pinyin']
-                            part_of_speech = word_data['part_of_speech']
-                            meaning = word_data['meaning']
-                            example = word_data['example']
-                            synonyms = word_data['synonyms']
+                            word = word_data.get('word', 'N/A')
+                            pinyin = word_data.get('pinyin', 'N/A')
+                            part_of_speech = word_data.get('part_of_speech', 'N/A')
+                            meaning = word_data.get('meaning', 'N/A')
+                            example = word_data.get('example', 'N/A')
+                            synonyms = word_data.get('synonyms', 'N/A')
                             
-                            # แปลตัวอย่างประโยคเป็นภาษาที่เลือก
                             example_translated = translate_text(example, target_language)
-                            
-                            # คำพ้องความหมายจะเป็นภาษาจีนเอง
-                            synonyms_translated = ", ".join(synonyms) if isinstance(synonyms, list) and synonyms else "N/A"
+                            synonyms_translated = ", ".join(synonyms) if isinstance(synonyms, list) else "N/A"
 
                             vocab_list.append({
                                 "Word": word,
@@ -99,11 +96,11 @@ def main():
                                 "Synonyms (Chinese)": synonyms_translated
                             })
 
-                        # แสดงตาราง
+                        # Display the dataframe
                         df = pd.DataFrame(vocab_list)
                         st.dataframe(df)
 
-                        # ดาวน์โหลดผลลัพธ์
+                        # Download the results as CSV
                         csv = df.to_csv(index=False).encode('utf-8')
                         st.download_button(
                             label="Download results as CSV",
@@ -120,4 +117,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

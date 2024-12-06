@@ -53,7 +53,7 @@ Sentence: {text}
 
 # ฟังก์ชันหลัก
 def main():
-    st.title("Explore and Learn Chinese: Translation & Vocabulary Tools")
+    st.title("Chinese Sentences Translation and Vocabulary Analysis")
     st.write("Easily translate Chinese sentences and learn key vocabulary with examples and synonyms.")
 
     # รับ Input จากผู้ใช้

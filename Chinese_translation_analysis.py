@@ -8,7 +8,7 @@ api_key = st.sidebar.text_input("Enter your OpenAI API key:", type="password")
 openai.api_key = api_key
 
 # ฟังก์ชันแปลภาษาจีน
-def translate_text(text, target_language="th"):
+def translate_text(text, target_language="en"):
     prompt = f"Translate the following Chinese sentence into {target_language}: {text}"
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",  # ใช้โมเดล gpt-3.5-turbo
@@ -39,12 +39,12 @@ Sentence: {text}
 
 # ฟังก์ชันหลัก
 def main():
-    st.title("Translate and Understand Chinese Sentence")
-    st.write("Easily translate and analyze Chinese text")
+    st.title("Easily Translate and Analyze Chinese Text")
+    st.write("Enter a Chinese sentence and get both translation and vocabulary analysis!")
 
     # รับ Input จากผู้ใช้
     chinese_text = st.text_area("Enter a Chinese sentence:")
-    target_language = st.selectbox("Select target language:", ["th", "en"])
+    target_language = st.selectbox("Select target language:", ["en", "th"])
     
     if st.button("Translate and Analyze"):
         if api_key and chinese_text:
@@ -66,7 +66,7 @@ def main():
                     if len(parts) >= 6:
                         vocab_data.append(parts[:6])  # เลือก 6 คอลัมน์ที่สำคัญ (คำ, พินอิน, ประเภทคำ, ความหมาย, ตัวอย่าง, คำพ้องความหมาย)
 
-                # สร้าง DataFrame จากข้อมูลที่ได้
+                # ตรวจสอบว่ามีข้อมูลก่อนที่จะทำการแสดงตาราง
                 if vocab_data:
                     df = pd.DataFrame(vocab_data, columns=["Word", "Pinyin", "Part of Speech", "Meaning", "Example Usage", "Synonyms"])
                     st.dataframe(df)
@@ -79,10 +79,10 @@ def main():
                         file_name="chinese_analysis_with_pinyin.csv",
                         mime="text/csv",
                     )
+                else:
+                    st.warning("No vocabulary data found for the provided sentence.")
         else:
             st.error("Please provide an API key and input text.")
 
 if __name__ == "__main__":
     main()
-
-

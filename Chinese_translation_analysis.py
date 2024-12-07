@@ -12,7 +12,7 @@ openai.api_key = api_key
 def translate_text(text, target_language="Thai"):
     prompt = f"Translate the following Chinese sentence into {target_language}: {text}"
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",  # ใช้โมเดล gpt-3.5-turbo
+        model="gpt-3.5-turbo",  
         messages=[{"role": "user", "content": prompt}],
         max_tokens=100
     )
@@ -40,7 +40,7 @@ give feedback in this pattern :
         6. Synonyms : (Synonyms)
     """
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",  # ใช้โมเดล gpt-3.5-turbo
+        model="gpt-3.5-turbo",  
         messages=[{"role": "user", "content": prompt}],
         max_tokens=300
     )

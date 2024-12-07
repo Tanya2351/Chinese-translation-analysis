@@ -52,7 +52,7 @@ def main():
     st.write("Translate and analyze Chinese sentences with vocabulary breakdown!")
 
     # รับ Input จากผู้ใช้
-    chinese_text = st.text_area("Enter a Chinese sentence:")
+    chinese_text = st.text_area("Enter a Chinese sentence:", key="chinese_text_area")
     target_language = st.selectbox("Select target language:", ["Thai", "English"])
     
     if st.button("Translate and Analyze"):
@@ -104,3 +104,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
